@@ -1,0 +1,9 @@
+/target
+/.build
+/.idea
+/.gradle
+/.mvn
+/.vscode
+/docs
+/spec
+/plan
