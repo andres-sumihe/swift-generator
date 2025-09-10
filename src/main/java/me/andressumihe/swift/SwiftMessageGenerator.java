@@ -1,90 +1,74 @@
 package me.andressumihe.swift;
 
-import com.prowidesoftware.swift.model.mt.mt1xx.MT103;
-import com.prowidesoftware.swift.model.field.*;
-import java.math.BigDecimal;
-import java.util.Date;
+import com.prowidesoftware.swift.model.mt.AbstractMT;
+import me.andressumihe.swift.cli.CommandLineOptions;
+import me.andressumihe.swift.cli.CommandLineParser;
+import me.andressumihe.swift.config.Configuration;
+import me.andressumihe.swift.config.ConfigurationManager;
+import me.andressumihe.swift.factory.MessageFormatterFactory;
+import me.andressumihe.swift.factory.MessageGeneratorFactory;
+import me.andressumihe.swift.service.SwiftMessageService;
+import me.andressumihe.swift.service.impl.SwiftMessageServiceImpl;
+
+import java.util.List;
 
 /**
- * SWIFT MT Message Generator for testing purposes
- * Uses Prowide Core library to generate various SWIFT MT messages
+ * SWIFT Message Generator - Main Entry Point
+ * 
+ * This class serves as the application's main entry point and dependency injection container.
+ * Demonstrates complete SOLID principle compliance through clean architecture.
+ * 
+ * Responsibilities:
+ * - Application bootstrap and configuration
+ * - Dependency injection setup
+ * - Command-line interface coordination
  */
 public class SwiftMessageGenerator {
 
     public static void main(String[] args) {
-        SwiftMessageGenerator generator = new SwiftMessageGenerator();
-        
-        System.out.println("=== SWIFT MT Message Generator ===");
-        System.out.println();
-        
-        // Generate MT103 - Single Customer Credit Transfer
-        String mt103Message = generator.generateMT103();
-        System.out.println("Generated MT103 Message:");
-        System.out.println(mt103Message);
-        System.out.println();
-        
-        System.out.println("Message generation completed successfully!");
+        SwiftMessageGenerator app = new SwiftMessageGenerator();
+        app.run(args);
     }
 
-    /**
-     * Generates a sample MT103 message (Single Customer Credit Transfer)
-     * @return SWIFT MT103 message as string
-     */
-    public String generateMT103() {
-        // Create MT103 message
-        MT103 mt103 = new MT103();
-        
-        // Set basic header information
-        mt103.setSender("BANKUSAAXXX");
-        mt103.setReceiver("BANKDEFRXXX");
-        
-        // Field 20: Transaction Reference Number
-        mt103.addField(new Field20("REF123456789"));
-        
-        // Field 23B: Bank Operation Code
-        mt103.addField(new Field23B("CRED"));
-        
-        // Field 32A: Value Date, Currency Code, Amount
-        mt103.addField(new Field32A("240822USD1000,00"));
-        
-        // Field 50K: Ordering Customer
-        mt103.addField(new Field50K("/1234567890\nJOHN DOE\n123 MAIN STREET\nNEW YORK NY 10001\nUS"));
-        
-        // Field 53A: Sender's Correspondent (optional)
-        mt103.addField(new Field53A("CHASUS33XXX"));
-        
-        // Field 57A: Account With Institution
-        mt103.addField(new Field57A("BANKDEFRXXX"));
-        
-        // Field 59: Beneficiary Customer
-        mt103.addField(new Field59("/DE89370400440532013000\nJANE SMITH\nBERLIN STRASSE 45\n10115 BERLIN\nDE"));
-        
-        // Field 70: Remittance Information
-        mt103.addField(new Field70("PAYMENT FOR SERVICES\nINVOICE 2024-001"));
-        
-        // Field 71A: Details of Charges
-        mt103.addField(new Field71A("SHA"));
-        
-        return mt103.message();
-    }
-
-    /**
-     * Generates a sample MT202 message (General Financial Institution Transfer)
-     * @return SWIFT MT202 message as string
-     */
-    public String generateMT202() {
-        // This method can be expanded to generate MT202 messages
-        // For now, returning a placeholder
-        return "MT202 generation not yet implemented";
-    }
-
-    /**
-     * Generates a sample MT940 message (Customer Statement Message)
-     * @return SWIFT MT940 message as string
-     */
-    public String generateMT940() {
-        // This method can be expanded to generate MT940 messages
-        // For now, returning a placeholder
-        return "MT940 generation not yet implemented";
+    public void run(String[] args) {
+        try {
+            // Dependency injection setup - all dependencies are abstractions
+            Configuration config = ConfigurationManager.getInstance();
+            CommandLineParser parser = new CommandLineParser((ConfigurationManager) config);
+            MessageGeneratorFactory generatorFactory = new MessageGeneratorFactory(config);
+            MessageFormatterFactory formatterFactory = new MessageFormatterFactory((ConfigurationManager) config);
+            
+            // Parse command line arguments
+            CommandLineOptions options;
+            try {
+                options = parser.parse(args);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error: " + e.getMessage());
+                parser.displayUsage();
+                System.exit(1);
+                return;
+            }
+            
+            // Create SOLID-compliant service with dependency injection
+            SwiftMessageService service = new SwiftMessageServiceImpl(
+                config, generatorFactory, formatterFactory);
+            
+            // Business logic execution through well-defined interface
+            service.displayGenerationParameters(options);
+            List<AbstractMT> messages = service.generateMessages(options);
+            String formattedContent = service.formatMessages(messages);
+            service.writeToFiles(formattedContent, options);
+            
+            // Display completion
+            System.out.println("\n" + "=".repeat(60));
+            System.out.println("GENERATION COMPLETED - " + messages.size() + " messages generated");
+            System.out.println("Files are formatted in " + options.getFormat().getDescription() + " format");
+            System.out.println("=".repeat(60));
+            
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }
