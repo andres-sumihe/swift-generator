@@ -2,6 +2,7 @@
 
 This is a Java Maven project for generating SWIFT MT messages for testing purposes using the Prowide Core library.
 
+!!READ THE COPILOT BEHAVIOUR!!
 ## Project Configuration
 
 - **Language**: Java 21
@@ -24,6 +25,7 @@ When working with this project:
 - Add unit tests for new message types
 - Use the Prowide Core library for all SWIFT message operations
 - Keep the code focused on testing and educational purposes
+- ALWAY FETCH FROM THIS RESOURCE FOR PROWIDE CORE: https://www.javadoc.io/doc/com.prowidesoftware/pw-swift-core/latest/index.html
 
 
 ## COPILOT BEHAVIOUR
