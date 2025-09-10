@@ -1,9 +1,66 @@
-/target
+# Compiled class files
+*.class
+
+# Maven build directory
+target/
 /.build
+
+# IntelliJ IDEA files
 /.idea
-/.gradle
-/.mvn
+*.iml
+*.iws
+
+# Eclipse files
+.project
+.classpath
+.settings/
+
+# VS Code files
 /.vscode
+
+# Maven wrapper files (optional)
+/.mvn
+
+# Gradle files
+/.gradle
+
+# Mac OS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Package Files (exclude from source control)
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs
+hs_err_pid*
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# docs
 /docs
-/spec
 /plan
+/spec
+/output
+/SIDE_RESULT
+/scripts
+#configuration
+application.properties

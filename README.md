@@ -1,119 +1,91 @@
 # SWIFT MT Message Generator
 
-A Java Maven project for generating SWIFT MT messages for testing purposes using the Prowide Core library.
-
-## Overview
-
-This project provides a simple way to generate various SWIFT MT (Message Type) messages that are commonly used in financial institutions for testing and development purposes. It uses the [Prowide Core](https://github.com/prowide/prowide-core) library, which is a comprehensive Java library for SWIFT message processing.
+Professional-grade SWIFT MT message generator built with Java 21 and Maven. Designed for financial institutions requiring high-volume, compliant SWIFT message generation for testing and development.
 
 ## Features
 
-- Generate MT103 messages (Single Customer Credit Transfer)
-- Extensible structure for additional MT message types (MT202, MT940, etc.)
-- Unit tests included
-- Maven-based build system
+- **Multi-Message Support**: MT101, MT103, MT202, MT940, MT950
+- **Bidirectional Flow**: Generate both INCOMING and OUTGOING messages
+- **Enterprise Formatting**: DOS-PCC format with binary output support
+- **High Performance**: Batch generation with configurable volume (1-10,000+ messages)
+- **SWIFT Compliance**: Full adherence to SWIFT MT standards
+- **Extensible Architecture**: Factory pattern with pluggable message generators
 
-## Prerequisites
+## Quick Start
 
-- Java 21 or higher
-- Maven 3.6 or higher
+### Prerequisites
+- Java 21+
+- Maven 3.6+
 
-## Getting Started
-
-### Build the Project
-
+### Build & Run
 ```bash
-mvn clean compile
-```
-
-### Run Tests
-
-```bash
-mvn test
-```
-
-### Run the Application
-
-```bash
-mvn exec:java -Dexec.mainClass="me.andressumihe.swift.SwiftMessageGenerator"
-```
-
-Or compile and run the JAR:
-
-```bash
+# Build standalone JAR
 mvn clean package
-java -jar target/swift-generator-1.0-SNAPSHOT.jar
+
+# Generate 100 outgoing MT103 messages
+java -jar target/swift-generator-standalone.jar -t MT103 -c 100 -d OUTGOING
+
+# Generate with custom output directory
+java -jar target/swift-generator-standalone.jar -t MT940 -c 50 -d INCOMING -o custom/path
 ```
 
-## Project Structure
-
+### Command Line Options
 ```
-swift-generator/
-├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── me/
-│   │           └── andressumihe/
-│   │               └── swift/
-│   │                   └── SwiftMessageGenerator.java
-│   └── test/
-│       └── java/
-│           └── me/
-│               └── andressumihe/
-│                   └── swift/
-│                       └── SwiftMessageGeneratorTest.java
-├── pom.xml
-└── README.md
+-t, --type       Message type (MT101|MT103|MT202|MT940|MT950)
+-c, --count      Number of messages (1-10000)
+-d, --direction  Direction (INCOMING|OUTGOING)
+-f, --format     Output format (DOS_PCC) [default]
+-o, --output     Output directory [default: ./output]
 ```
 
-## Supported Message Types
+## Message Types
 
-### MT103 - Single Customer Credit Transfer
+| Type | Description | Fields |
+|------|-------------|---------|
+| **MT101** | Request for Transfer | Customer payment orders |
+| **MT103** | Single Customer Credit Transfer | Standard wire transfers |
+| **MT202** | General Financial Institution Transfer | Bank-to-bank transfers |
+| **MT940** | Customer Statement Message | Account statements |
+| **MT950** | Statement Message | Detailed account reporting |
 
-The MT103 is a SWIFT message type that is used to send funds between banks on behalf of their customers. The generated message includes:
+## Output Formats
 
-- Transaction Reference Number (Field 20)
-- Bank Operation Code (Field 23B)
-- Value Date, Currency Code, Amount (Field 32A)
-- Ordering Customer details (Field 50K)
-- Account With Institution (Field 57A)
-- Beneficiary Customer details (Field 59)
-- Remittance Information (Field 70)
-- Details of Charges (Field 71A)
+### DOS-PCC Format
+- Binary sector-based format (512-byte sectors)
+- Suitable for legacy mainframe systems
+### RJE Format
+- Dollar Separated Remote Job Entry for Alliance Access format batch input
 
-### Planned Message Types
+## Architecture
 
-- MT202 - General Financial Institution Transfer
-- MT940 - Customer Statement Message
-- Additional MT message types as needed
-
-## Usage Example
-
-```java
-SwiftMessageGenerator generator = new SwiftMessageGenerator();
-String mt103Message = generator.generateMT103();
-System.out.println(mt103Message);
+```
+SwiftMessageGenerator
+├── MessageGeneratorFactory    # Factory pattern for message creation
+├── MessageFormatterFactory    # Factory pattern for output formatting
+├── AbstractMessageGenerator   # Template method base class
+├── MT{Type}Generator          # Specific message generators
+└── ConfigurationManager       # Centralized configuration
 ```
 
 ## Dependencies
 
-- **Prowide Core**: The core library for SWIFT message processing
-- **JUnit 4**: For unit testing
+- **[Prowide Core SRU2024](https://www.prowidesoftware.com/)** - SWIFT message processing
+- **Apache Commons CLI** - Command line interface
+- **JUnit 4** - Unit testing framework
 
-## Contributing
+## Development
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
+```bash
+# Run tests
+mvn test
+
+# Compile only
+mvn compile
+
+# Generate with debug logging
+java -jar target/swift-generator-standalone.jar -t MT103 -c 1 -d OUTGOING
+```
 
 ## License
 
-This project is for educational and testing purposes. Please refer to the Prowide Core library license for commercial usage terms.
-
-## Resources
-
-- [Prowide Core Documentation](https://www.prowidesoftware.com/products/prowide-core)
-- [SWIFT Standards](https://www.swift.com/standards)
-- [Maven Documentation](https://maven.apache.org/guides/)
+Educational and testing purposes. See [Prowide Core License](https://www.prowidesoftware.com/products/prowide-core) for commercial usage terms.
